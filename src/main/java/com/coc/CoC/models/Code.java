@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class Code {
     String code;
+    String input;
     int lang_code;
     LocalDateTime dateTime;
 }

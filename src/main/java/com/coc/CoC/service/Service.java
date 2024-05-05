@@ -1,7 +1,6 @@
 package com.coc.CoC.service;
 
 import com.coc.CoC.models.Output;
-import org.springframework.boot.SpringApplication;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,32 +45,27 @@ public class Service {
         return null;
     }
 
+    private ArrayList<String> get_inputs(String input){
+        StringTokenizer st = new StringTokenizer(input , "\n");
+        ArrayList<String> inputs = new ArrayList<>();
+        while (st.hasMoreTokens()){
+            inputs.add(st.nextToken());
+        }
+        return inputs;
+    }
+
 
     // for deleting file
     public void deleteFile(String fileName) throws IOException {
-        String delete_command = "del "+fileName;
+        String delete_command = "rm "+fileName;
         ProcessBuilder builder = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "cd \"C:\\Users\\manas\\Desktop\\TestFolder\""+
-                        " && "+delete_command);
+                "/bin/bash", "-c",
+                "cd /home/ubuntu/javaCode && " + delete_command);
         builder.redirectErrorStream(true);
         builder.start();
     }
 
-    private String runCommand(String command) throws IOException {
-        ProcessBuilder builder = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "cd \"C:\\Users\\manas\\Desktop\\TestFolder\""+
-                        " && "+command);
-        builder.redirectErrorStream(true);
-        Process p = builder.start();
-        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line=r.readLine();
-        if(line != null) return line;
-        return "";
-    }
-
-    public Output execute_Java(String program) throws IOException {
+    public Output execute_Java(String program,String input) throws IOException {
 
         Output response = new Output();
 
@@ -79,7 +73,11 @@ public class Service {
 
         if(className == null){
             response.upadteOutput("Invalid class name !");
+            return response;
         }
+
+        System.err.print("classname is : ");
+        System.out.println(className);
 
         /*
 
@@ -89,36 +87,30 @@ public class Service {
          */
 
         String java_className = className+".java";
-        String file_creation_command = "echo. > " + java_className;
-        // for windows
+        String file_creation_command = "touch "+java_className;
+        // for linux
 
         // Creating File
         ProcessBuilder builder = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "cd \"C:\\Users\\manas\\Desktop\\TestFolder\""+
-                        " && "+file_creation_command);
+                "/bin/bash", "-c",
+                "cd /home/ubuntu/javaCode" +" && " + file_creation_command);
         builder.redirectErrorStream(true);
         builder.start();
 
-
-        /*
-        CMD access to root user
-         */
-        String username = runCommand("echo %USERNAME%");
-        String write_command  = "icacls . /grant " + username+":W";
-        runCommand(write_command);
+        System.out.println("FILE CREATED ! ");
 
         // write code to file
-        String path = "C:\\Users\\manas\\Desktop\\TestFolder\\"+java_className;
+        String path = "/home/ubuntu/javaCode/"+java_className;
         Path fileName = Path.of(path);
         Files.writeString(fileName, program);
+
+        System.out.println("Written in file");
 
         //Compiling the result
         String compile_command = "javac "+java_className;
         builder = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "cd \"C:\\Users\\manas\\Desktop\\TestFolder\""+
-                        " && "+compile_command);
+                "/bin/bash", "-c",
+                "cd /home/ubuntu/javaCode && " + compile_command);
         builder.redirectErrorStream(true);
         Process p = builder.start();
         BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -127,21 +119,23 @@ public class Service {
             line = r.readLine();
             if (line == null) { break; }
             response.upadteOutput(line);
+            response.upadteOutput("WHILE COMPILING");
         }
 
         if(response.getOutput().length() != 0){
             // Some error while compiling
-            deleteFile(java_className);
-            deleteFile(className+".class");
+//            deleteFile(java_className);
+//            deleteFile(className+".class");
             return response;
         }
+
+        System.out.println("COMPILED SUCCESS");
 
         // Execute the result
         String execute_command = "java "+className;
         builder = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "cd \"C:\\Users\\manas\\Desktop\\TestFolder\""+
-                        " && "+execute_command);
+                "/bin/bash", "-c",
+                "cd /home/ubuntu/javaCode && " + execute_command);
         builder.redirectErrorStream(true);
         p = builder.start();
         r = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -151,8 +145,16 @@ public class Service {
             response.upadteOutput(line);
         }
 
-        deleteFile(java_className);
-        deleteFile(className+".class");
+        int input_pointer = 0;
+        while (response.getOutput().length() == 0){
+            // Logic Here for input
+        }
+
+//        deleteFile(java_className);
+//        deleteFile(className+".class");
+
+        System.out.println("RUN SUCCESS");
+
 
         return response;
     }
