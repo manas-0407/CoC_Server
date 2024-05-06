@@ -54,7 +54,6 @@ public class Service {
         return inputs;
     }
 
-
     // for deleting file
     public void deleteFile(String fileName) throws IOException {
         String delete_command = "rm "+fileName;
@@ -72,12 +71,9 @@ public class Service {
         String className = getClassName(program);
 
         if(className == null){
-            response.upadteOutput("Invalid class name !");
+            response.updateOutput("Invalid class name !");
             return response;
         }
-
-        System.err.print("classname is : ");
-        System.out.println(className);
 
         /*
 
@@ -97,17 +93,13 @@ public class Service {
         builder.redirectErrorStream(true);
         builder.start();
 
-        System.out.println("FILE CREATED ! ");
-
         // write code to file
-        String path = "/home/ubuntu/javaCode/"+java_className;
+        String path = "/home/ubuntu/javaCode/" + java_className;
         Path fileName = Path.of(path);
         Files.writeString(fileName, program);
 
-        System.out.println("Written in file");
-
         //Compiling the result
-        String compile_command = "javac "+java_className;
+        String compile_command = "javac " + java_className;
         builder = new ProcessBuilder(
                 "/bin/bash", "-c",
                 "cd /home/ubuntu/javaCode && " + compile_command);
@@ -118,18 +110,15 @@ public class Service {
         while (true) {
             line = r.readLine();
             if (line == null) { break; }
-            response.upadteOutput(line);
-            response.upadteOutput("WHILE COMPILING");
+            response.updateOutput(line);
         }
 
         if(response.getOutput().length() != 0){
             // Some error while compiling
-//            deleteFile(java_className);
-//            deleteFile(className+".class");
+            deleteFile(java_className);
+            deleteFile(className+".class");
             return response;
         }
-
-        System.out.println("COMPILED SUCCESS");
 
         // Execute the result
         String execute_command = "java "+className;
@@ -139,22 +128,30 @@ public class Service {
         builder.redirectErrorStream(true);
         p = builder.start();
         r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+        ArrayList<String> inputs = input!=null ? get_inputs(input) : null;
+        int input_pointer = 0;
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(p.getOutputStream()));
+
+        while (inputs!=null && input_pointer < inputs.size()){
+
+            writer.println(inputs.get(input_pointer));
+            writer.flush();
+            input_pointer++;
+
+        }
+
         while (true) {
             line = r.readLine();
             if (line == null) { break; }
-            response.upadteOutput(line);
+            response.updateOutput(line);
         }
 
-        int input_pointer = 0;
-        while (response.getOutput().length() == 0){
-            // Logic Here for input
-        }
+        deleteFile(java_className);
+        deleteFile(className+".class");
 
-//        deleteFile(java_className);
-//        deleteFile(className+".class");
-
-        System.out.println("RUN SUCCESS");
-
+        writer.close();
+        r.close();
 
         return response;
     }

@@ -13,7 +13,7 @@ public class Output {
         output = new StringBuilder();
     }
 
-    public void upadteOutput(String s) {
+    public void updateOutput(String s) {
         output.append(s).append("\n");
     }
 }
