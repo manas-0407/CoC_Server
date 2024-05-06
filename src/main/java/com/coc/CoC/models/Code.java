@@ -1,5 +1,6 @@
 package com.coc.CoC.models;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class Code {
     String code;
+    String input;
     int lang_code;
     LocalDateTime dateTime;
 }

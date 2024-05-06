@@ -71,14 +71,24 @@ public class Service {
         return "";
     }
 
-    public Output execute_Java(String program) throws IOException {
+    private ArrayList<String> get_inputs(String input){
+        StringTokenizer st = new StringTokenizer(input , "\n");
+        ArrayList<String> inputs = new ArrayList<>();
+        while (st.hasMoreTokens()){
+            inputs.add(st.nextToken());
+        }
+        return inputs;
+    }
+
+    public Output execute_Java(String program,String input) throws IOException {
 
         Output response = new Output();
 
         String className = getClassName(program);
 
         if(className == null){
-            response.upadteOutput("Invalid class name !");
+            response.updateOutput("Invalid class name !");
+            return response;
         }
 
         /*
@@ -126,7 +136,7 @@ public class Service {
         while (true) {
             line = r.readLine();
             if (line == null) { break; }
-            response.upadteOutput(line);
+            response.updateOutput(line);
         }
 
         if(response.getOutput().length() != 0){
@@ -145,19 +155,37 @@ public class Service {
         builder.redirectErrorStream(true);
         p = builder.start();
         r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+        ArrayList<String> inputs = input!=null ? get_inputs(input) : null;
+        int input_pointer = 0;
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(p.getOutputStream()));
+
+        while (inputs!=null && input_pointer < inputs.size()){
+
+            writer.println(inputs.get(input_pointer));
+            writer.flush();
+            input_pointer++;
+
+        }
+
         while (true) {
             line = r.readLine();
             if (line == null) { break; }
-            response.upadteOutput(line);
+            response.updateOutput(line);
         }
 
         deleteFile(java_className);
         deleteFile(className+".class");
 
+        writer.close();
+        r.close();
+
         return response;
     }
 
 }
+
+
 
 
 
@@ -172,4 +200,9 @@ public class Service {
         Compile .java
         Execute .class
         Delete File
+
+        This version has user input handled
+
+        If the user submits a code which need some user input but he hasn't provided any input field then
+         we will wait for some time and then kill the process aka timeout
  */
