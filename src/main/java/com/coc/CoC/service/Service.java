@@ -6,10 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.io.*;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 @org.springframework.stereotype.Service
 public class Service {
+
+    private ExecutorService executorService;
+
+    Service(){
+        this.executorService = Executors.newFixedThreadPool(2);
+    }
 
     private final String valid_java_class_regex = "^[A-Za-z]\\w*$";
 
@@ -154,6 +161,23 @@ public class Service {
         r.close();
 
         return response;
+    }
+
+    // Handles concurrency of multiple submissions and also stop deadlock of no input file
+
+    public Output threadHandler(String program , String input){
+
+        Future<?> future = executorService.submit(() -> execute_Java(program, input));
+
+        try{
+            future.get(8000 , TimeUnit.MILLISECONDS);
+        }catch (TimeoutException | ExecutionException |InterruptedException e){
+            Output output = new Output();
+            output.updateOutput("Execution Timed Out, try providing some input");
+            return output;
+        }
+
+        return new Output(); 
     }
 
 }

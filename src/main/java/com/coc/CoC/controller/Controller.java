@@ -22,7 +22,7 @@ public class Controller {
 
         Output output = null;
         if(code.getLang_code() == 1){
-            output = service.execute_Java(code.getCode(),code.getInput());
+            output = service.threadHandler(code.getCode(),code.getInput());
         }
         return ResponseEntity.ok(output);
     }
