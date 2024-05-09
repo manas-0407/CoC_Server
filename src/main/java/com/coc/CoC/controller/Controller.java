@@ -18,11 +18,11 @@ public class Controller {
     Service service;
 
     @PostMapping(value = "/run")
-    public ResponseEntity<Output> runCode(@RequestBody Code code) throws IOException, InterruptedException {
+    public ResponseEntity<Output> runCode(@RequestBody Code code) throws IOException {
 
         Output output = null;
         if(code.getLang_code() == 1){
-            output = service.execute_Java(code.getCode(),code.getInput());
+            output = service.threadHandler(code.getCode(),code.getInput());
         }
         return ResponseEntity.ok(output);
     }
