@@ -39,11 +39,25 @@ public class Service {
 
     private String getClassName(String program){
 
-        StringTokenizer stringTokenizer = new StringTokenizer(program);
+        StringTokenizer stringTokenizer = new StringTokenizer(program," \n");
         boolean got_class = false;
         while (stringTokenizer.hasMoreTokens()){
             String token = stringTokenizer.nextToken();
             if(got_class){
+                int i=0;
+                String temp_token = token.trim().toLowerCase();
+                while (i<token.length()){
+                    if(temp_token.charAt(i)>=97 && temp_token.charAt(i)<=122) break;
+                    i++;
+                }
+                token = token.substring(i);
+                temp_token = token.toLowerCase();
+                i = temp_token.length()-1;
+                while (i>=0){
+                    if(temp_token.charAt(i)>=97 && temp_token.charAt(i)<=122) break;
+                    i--;
+                }
+                token = token.substring(0,i+1);
                 if(regex_match(valid_java_class_regex , token)){
                     return token;
                 }
