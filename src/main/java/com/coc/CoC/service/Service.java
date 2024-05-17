@@ -184,14 +184,13 @@ public class Service {
         Future<?> future = executorService.submit(() -> execute_Java(program, input));
 
         try{
-            future.get(8000 , TimeUnit.MILLISECONDS);
+            return (Output) future.get(8000 , TimeUnit.MILLISECONDS);
         }catch (TimeoutException | ExecutionException |InterruptedException e){
             Output output = new Output();
             output.updateOutput("Execution Timed Out, try providing some input");
             return output;
         }
 
-        return new Output(); 
     }
 
 }
