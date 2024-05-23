@@ -1,6 +1,5 @@
 package com.coc.CoC.models;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
