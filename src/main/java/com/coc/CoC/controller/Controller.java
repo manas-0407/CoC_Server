@@ -3,6 +3,8 @@ package com.coc.CoC.controller;
 import com.coc.CoC.models.Code;
 import com.coc.CoC.models.Output;
 import com.coc.CoC.service.Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -39,7 +41,11 @@ public class Controller {
     public ConcurrentHashMap<String, CompletableFuture<Output>> pendingRequests = new ConcurrentHashMap<>();
 
     @PostMapping(value = "/run")
-    public ResponseEntity<Output> runCode(@RequestBody Code code) throws ExecutionException, InterruptedException {
+    public ResponseEntity<Output> runCode(@RequestBody String json) throws ExecutionException, InterruptedException, JsonProcessingException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        Code code = mapper.readValue(json , Code.class);
 
         String correlate_id = UUID.randomUUID().toString();
         CompletableFuture<Output> future = new CompletableFuture<>();
